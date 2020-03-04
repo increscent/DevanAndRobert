@@ -120,6 +120,7 @@ function serveStatic(res, filename) {
         }
         let contentType = mimeTypes[ext];
 
+		res.setHeader('Cache-Control', 'public, max-age=86400');
         return res.send(data, 200, contentType);
     });
 }
