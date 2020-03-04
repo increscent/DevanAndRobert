@@ -88,7 +88,7 @@ module.exports = ({port, hostname, staticDirs}) => {
                     let dir2 = dirParts.concat(pathParts).join('/');
 
                     fs.readdir(dir2, (err, files) => {
-                        if (files.includes('index.html')) return serveStatic(res, dir2+'/index.html');
+                        if (!err && files.includes('index.html')) return serveStatic(res, dir2+'/index.html');
 
                         tryStatic(dirs);
                     });
