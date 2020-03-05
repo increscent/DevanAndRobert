@@ -2,13 +2,16 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const hostname = '127.0.0.1';
-const port = 4445;
+var PORT = null;
+var HOSTNAME = null;
+var STATIC_DIRS = null;
+var NOT_FOUND_PAGE = null;
 
-module.exports = ({port, hostname, staticDirs}) => {
-    port = port || 80;
-    hostname = hostname || '127.0.0.1';
-    staticDirs = staticDirs || [];
+module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
+    PORT = port || 80;
+    HOSTNAME = hostname || '127.0.0.1';
+    STATIC_DIRS = staticDirs || [];
+    NOT_FOUND_PAGE = notFoundPage || null;
 
     let handlers = {
     };
@@ -62,7 +65,7 @@ module.exports = ({port, hostname, staticDirs}) => {
             if (handler) return handler.handler(req, res);
 
             // try static files only for GET
-            if (req.method != 'GET') return res.send('Not found', 404);
+            if (req.method != 'GET') return notFound(res);
 
             tryList = [
                 `${req.path}`,
@@ -71,7 +74,7 @@ module.exports = ({port, hostname, staticDirs}) => {
             ];
 
             let tryStatic = (dirs) => {
-                if (dirs.length == 0) return res.send('Not found', 404);
+                if (dirs.length == 0) return notFound(res);
 
                 let dirParts = dirs.shift().split('/').filter(x => x);
 
@@ -95,32 +98,46 @@ module.exports = ({port, hostname, staticDirs}) => {
                 });
             };
 
-            tryStatic(staticDirs.slice());
+            tryStatic(STATIC_DIRS.slice());
         });
     });
 
-    server.listen(port, hostname, () => {
-        console.log(`Server running at http://${hostname}:${port}`);
+    server.listen(PORT, HOSTNAME, () => {
+        console.log(`Server running at http://${HOSTNAME}:${PORT}`);
     });
 };
 
-function serveStatic(res, filename) {
+function serveStatic(res, filename, statusCode) {
     fs.readFile(filename, (err, data) => {
-        if (err) return res.send('Not found', 404);
+        if (err) return notFound(res);
 
         let ext = path.extname(filename);
-        let mimeTypes = {
-            ['.png']: 'image/png',
-            ['.jpg']: 'image/jpeg',
-            ['.css']: 'text/css',
-            ['.js']: 'application/javascript',
-            ['.json']: 'application/json',
-            ['.html']: 'text/html',
-            ['.txt']: 'text/plain',
+        let extensions = {
+            ['.png']: ['image/png', 86400],
+            ['.jpg']: ['image/jpeg', 86400],
+            ['.css']: ['text/css', 60],
+            ['.js']: ['application/javascript', 60],
+            ['.json']: ['application/json', 60],
+            ['.html']: ['text/html', 60],
+            ['.txt']: ['text/plain', 60],
+            ['.woff']: ['font/woff', 31557600],
+            ['.woff2']: ['font/woff2', 31557600],
+            ['.ttf']: ['font/ttf', 31557600],
+            ['.svg']: ['image/svg+xml', 31557600],
+            ['.eot']: ['application/vnd.ms-fontobject', 31557600],
         }
-        let contentType = mimeTypes[ext];
+        let contentType = extensions[ext] ? extensions[ext][0] : 'text/plain';
+        let maxAge = extensions[ext] ? extensions[ext][1] : 86400;
 
-		res.setHeader('Cache-Control', 'public, max-age=86400');
-        return res.send(data, 200, contentType);
+		res.setHeader('Cache-Control', `public, max-age=${maxAge}`);
+        return res.send(data, statusCode || 200, contentType);
     });
+}
+
+function notFound(res) {
+    if (NOT_FOUND_PAGE) {
+        serveStatic(res, NOT_FOUND_PAGE, 404);
+    } else {
+        res.send('Not found', 404);
+    }
 }
