@@ -47,14 +47,14 @@ body {
 
 .background-left {
     position: fixed;
-    width: 20%;
+    width: 350px;
     left: 0;
     top: 100px;
 }
 
 .background-right {
     position: fixed;
-    width: 20%;
+    width: 350px;
     right: 0;
     top: 100px;
 }
