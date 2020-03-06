@@ -12,6 +12,17 @@ let app = server({
     notFoundPage: './public/404.html'
 });
 
+app.get('/rsvp/download', (req, res) => {
+    if (req.queryString == config.auth.password) {
+        db.query('SELECT * FROM rsvp ORDER BY time DESC',
+            (error) => res.sendJson({error}, 500),
+            (data) => res.sendJson(data)
+        );
+    } else {
+        res.send('Not Authorized', 401);
+    }
+});
+
 app.post('/rsvp/submit', (req, res) => {
     let attending_reception = req.body.attending_reception == 'yes';
     let attending_sealing = req.body.attending_sealing == 'yes';
@@ -27,8 +38,9 @@ app.post('/rsvp/submit', (req, res) => {
             + 'attending_sealing, '
             + 'reception_guest_count, '
             + 'sealing_guest_count, '
-            + 'ip'
-            + ') values (?, ?, ?, ?, ?, ?, ?, ?);',
+            + 'ip, '
+            + 'time'
+            + ') values (?, ?, ?, ?, ?, ?, ?, ?, ?);',
             uuid(),
             req.body.email,
             req.body.name,
@@ -36,7 +48,8 @@ app.post('/rsvp/submit', (req, res) => {
             attending_sealing ? 1 : 0,
             reception_guest_count || 0,
             sealing_guest_count || 0,
-            req.ip
+            req.ip,
+            Date.now()
         ),
         (error) => {
             sendEmail('robert@increscent.org', 'RSVP Failed', JSON.stringify({error, body: req.body}));
@@ -44,6 +57,19 @@ app.post('/rsvp/submit', (req, res) => {
         },
         () => res.sendFile('./public/rsvp_submitted.html')
     );
+});
+
+app.middleware((req, res) => {
+    if (req.path.includes('.html') || !req.path.includes('.')) {
+        db.query(
+            db.expr('INSERT INTO stats (method, path, ip, time) values (?, ?, ?, ?)',
+                req.method,
+                req.path,
+                req.ip,
+                Date.now()
+            )
+        );
+    }
 });
 
 var transporter = nodemailer.createTransport({

@@ -7,6 +7,7 @@ var HOSTNAME = null;
 var STATIC_DIRS = null;
 var NOT_FOUND_PAGE = null;
 var HANDLERS = {};
+var MIDDLEWARE = [];
 
 module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
     PORT = port || 80;
@@ -15,13 +16,14 @@ module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
     NOT_FOUND_PAGE = notFoundPage || null;
 
     const server = http.createServer((req, res) => {
-        let [url, queryStr] = req.url.split('?', 2);
+        let [url, queryString] = req.url.split('?', 2);
 
-        req.query = parseQueryString(queryStr);
+        req.queryString = queryString;
+        req.query = parseQueryString(queryString);
 
         let pathParts = getPathParts(url);
 
-        req.path = pathParts.join('/');
+        req.path = '/' + pathParts.join('/');
 
         res.send = (data, statusCode, contentType) => {
             res.statusCode = statusCode || 200;
@@ -74,6 +76,8 @@ module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
             let handler = (HANDLERS[req.method] || []).find((x) => matchPath(x.path));
 
             try {
+                MIDDLEWARE.forEach((handler) => handler(req, res));
+
                 if (handler) return handler.handler(req, res);
             } catch (e) {
                 console.log(e);
@@ -142,6 +146,7 @@ module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
         delete: handlerAdder('DELETE'),
         head: handlerAdder('HEAD'),
         options: handlerAdder('OPTIONS'),
+        middleware: (handler) => MIDDLEWARE.push(handler),
     };
 };
 
@@ -193,7 +198,7 @@ function parseQueryString(queryStr) {
         queryStr
             .split('&')
             .map(x => x.split('='))
-            .map(x => x.map(y => decodeURIComponent(y)))
+            .map(x => x.map(y => decodeURIComponent(y).replace(/\+/g, ' ')))
             .map(([x, y]) => query[x] = y);
     }
     return query;
