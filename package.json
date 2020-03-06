@@ -1,0 +1,24 @@
+{
+  "name": "dr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/increscent/DevanAndRobert.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/increscent/DevanAndRobert/issues"
+  },
+  "homepage": "https://github.com/increscent/DevanAndRobert#readme",
+  "dependencies": {
+    "nodemailer": "^6.4.4",
+    "uuid": "^7.0.2"
+  }
+}

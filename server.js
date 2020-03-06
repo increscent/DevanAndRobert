@@ -39,6 +39,8 @@ module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
             serveStatic(res, filename, statusCode);
         };
 
+        req.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
         let body = [];
         req.on('data', (chunk) => body.push(chunk));
         req.on('end', () => {
@@ -74,6 +76,7 @@ module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
             try {
                 if (handler) return handler.handler(req, res);
             } catch (e) {
+                console.log(e);
                 return res.send('Internal Server Error', 500);
             }
 

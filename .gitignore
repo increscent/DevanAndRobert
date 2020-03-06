@@ -1,3 +1,5 @@
 config.js
 *.swp
 node_modules
+sqlite/dr_db.sqlite
+sqlite/sqlite
