@@ -31,8 +31,6 @@ function query(sql, onError, onSuccess) {
 
     request_buffer.push({sql, onError, onSuccess});
 
-    console.log(sql);
-
     if (request_buffer.length == 1) {
         sendQuery();
     }
