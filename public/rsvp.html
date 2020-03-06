@@ -32,25 +32,25 @@
                         <table>
                             <tr>
                                 <td>Name:</td>
-                                <td><input type="text" name="name"></td>
+                                <td><input type="text" name="name" required></td>
                             </tr>
                             <tr>
                                 <td>Email:</td>
-                                <td><input type="email" name="email"></td>
+                                <td><input type="email" name="email" placeholder="Optional"></td>
                             </tr>
                             <tr>
                                 <td>Number of Guests:</td>
-                                <td><input type="number" name="guest_count"></td>
+                                <td><input type="number" name="guest_count" required></td>
                             </tr>
                             <tr>
                                 <td>Attending the Reception?</td>
                                 <td>
-                                    <input type="radio" id="yes_reception" name="attending_reception" value="yes">
+                                    <input type="radio" id="yes_reception" name="attending_reception" value="yes" required>
                                     <label for="yes_reception">Yes</label>
 
                                     &emsp;
 
-                                    <input type="radio" id="no_reception" name="attending_reception" value="no">
+                                    <input type="radio" id="no_reception" name="attending_reception" value="no" required>
                                     <label for="no_reception">No</label>
                                 </td>
                             </tr>

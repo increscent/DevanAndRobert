@@ -9,5 +9,5 @@ let app = server({
 
 app.post('/rsvp/submit', (req, res) => {
     console.log(req.body);
-    res.sendFile('./public/rsvp.html');
+    res.sendFile('./public/rsvp_submitted.html');
 });
