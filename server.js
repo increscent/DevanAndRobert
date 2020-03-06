@@ -6,6 +6,7 @@ var PORT = null;
 var HOSTNAME = null;
 var STATIC_DIRS = null;
 var NOT_FOUND_PAGE = null;
+var HANDLERS = {};
 
 module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
     PORT = port || 80;
@@ -13,23 +14,12 @@ module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
     STATIC_DIRS = staticDirs || [];
     NOT_FOUND_PAGE = notFoundPage || null;
 
-    let handlers = {
-    };
-
     const server = http.createServer((req, res) => {
         let [url, queryStr] = req.url.split('?', 2);
 
-        req.query = {};
-        if (queryStr) queryStr
-            .split('&')
-            .map(x => x.split('='))
-            .map(x => x.map(y => decodeURIComponent(y)))
-            .map(([x, y]) => req.query[x] = y);
+        req.query = parseQueryString(queryStr);
 
-        let pathParts = url
-            .replace(/\.\./g, '')
-            .split('/')
-            .filter(x => x);
+        let pathParts = getPathParts(url);
 
         req.path = pathParts.join('/');
 
@@ -45,24 +35,47 @@ module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
             res.send(json, statusCode, 'application/json');
         }
 
+        res.sendFile = (filename, statusCode) => {
+            serveStatic(res, filename, statusCode);
+        };
+
         let body = [];
         req.on('data', (chunk) => body.push(chunk));
         req.on('end', () => {
             let bodyStr = Buffer.concat(body).toString();
 
-            req.body = (req.headers['content-type'] == 'application/json') ?
-                JSON.parse(bodyStr) : bodyStr;
+            switch (req.headers['content-type']) {
+                case 'application/json':
+                    try {
+                        req.body = JSON.parse(bodyStr);
+                    } catch (e) {
+                        return res.send('Malformed JSON', 400);
+                    }
+                    break;
+
+                case 'application/x-www-form-urlencoded':
+                    req.body = parseQueryString(bodyStr);
+                    break;
+
+                default:
+                    req.body = bodyStr;
+            }
 
             let matchPath = (targetPath) => {
-                let targetPathParts = targetPath.split('/');
+                let targetPathParts = targetPath.split('/').filter(x => x);
 
-                return pathParts.map((x, i) => [x, targetPathParts[i]])
+                return pathParts.length == targetPathParts.length &&
+                    pathParts.map((x, i) => [x, targetPathParts[i]])
                     .reduce((acc, [x, y]) => (x == y) && acc, true);
             };
 
-            let handler = (handlers[req.method] || []).find((x) => matchPath(x.path));
+            let handler = (HANDLERS[req.method] || []).find((x) => matchPath(x.path));
 
-            if (handler) return handler.handler(req, res);
+            try {
+                if (handler) return handler.handler(req, res);
+            } catch (e) {
+                return res.send('Internal Server Error', 500);
+            }
 
             // try static files only for GET
             if (req.method != 'GET') return notFound(res);
@@ -105,6 +118,28 @@ module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
     server.listen(PORT, HOSTNAME, () => {
         console.log(`Server running at http://${HOSTNAME}:${PORT}`);
     });
+
+    let addHandler = (method, path, handler) => {
+        HANDLERS[method] = [
+            ...(HANDLERS[method] || []),
+            {path, handler},
+        ];
+    };
+
+    let handlerAdder = (method) => {
+        return (path, handler) => {
+            addHandler(method, path, handler);
+        };
+    };
+
+    return {
+        get:  handlerAdder('GET'),
+        put: handlerAdder('PUT'),
+        post: handlerAdder('POST'),
+        delete: handlerAdder('DELETE'),
+        head: handlerAdder('HEAD'),
+        options: handlerAdder('OPTIONS'),
+    };
 };
 
 function serveStatic(res, filename, statusCode) {
@@ -140,4 +175,23 @@ function notFound(res) {
     } else {
         res.send('Not found', 404);
     }
+}
+
+function getPathParts(path) {
+    return path
+        .replace(/\.\./g, '')
+        .split('/')
+        .filter(x => x);
+}
+
+function parseQueryString(queryStr) {
+    let query = {};
+    if (queryStr) {
+        queryStr
+            .split('&')
+            .map(x => x.split('='))
+            .map(x => x.map(y => decodeURIComponent(y)))
+            .map(([x, y]) => query[x] = y);
+    }
+    return query;
 }

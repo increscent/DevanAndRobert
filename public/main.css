@@ -132,3 +132,15 @@ body {
     text-align: center;
     padding-top: 20px;
 }
+
+form td {
+    padding: 5px 10px;
+}
+
+form td:first-child {
+    text-align: right;
+}
+
+form input[type=number] {
+    width: 50px;
+}
