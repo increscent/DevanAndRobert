@@ -22,7 +22,7 @@ app.get('/rsvp/download', (req, res) => {
                     let name = row.name.replace(/"/g, '""');
                     let attendingReception = row.attending_reception == '1' ? 'Yes' : 'No';
                     let attendingSealing = row.attending_sealing == '1' ? 'Yes' : 'No';
-                    let rsvpDate = (new Date(row.time)).toString();
+                    let rsvpDate = (new Date(parseInt(row.time))).toString();
                     return `"${name}", ${attendingReception}, ${row.reception_guest_count}, ${attendingSealing}, ${row.sealing_guest_count}, ${rsvpDate}`;
                 });
 
