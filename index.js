@@ -16,7 +16,20 @@ app.get('/rsvp/download', (req, res) => {
     if (req.queryString == config.auth.password) {
         db.query('SELECT * FROM rsvp ORDER BY time DESC',
             (error) => res.sendJson({error}, 500),
-            (data) => res.sendJson(data)
+            (data) => {
+                let csvHeader = '"Name", "Attending Reception", "Reception Guest Count", "Attending Sealing", "Sealing Guest Count", "RSVP Date"';
+                let csvLines = data.map(row => {
+                    let name = row.name.replace(/"/g, '""');
+                    let attendingReception = row.attending_reception == '1' ? 'Yes' : 'No';
+                    let attendingSealing = row.attending_sealing == '1' ? 'Yes' : 'No';
+                    let rsvpDate = (new Date(row.time)).toString();
+                    return `"${name}", ${attendingReception}, ${row.reception_guest_count}, ${attendingSealing}, ${row.sealing_guest_count}, ${rsvpDate}`;
+                });
+
+                let csv = [csvHeader, ...csvLines].join('\n');
+
+                res.send(csv, 200, 'text/csv');
+            }
         );
     } else {
         res.send('Not Authorized', 401);
@@ -32,23 +45,19 @@ app.post('/rsvp/submit', (req, res) => {
     db.query(
         db.expr('INSERT INTO rsvp ('
             + 'id, '
-            + 'email, '
             + 'name, '
             + 'attending_reception, '
             + 'attending_sealing, '
             + 'reception_guest_count, '
             + 'sealing_guest_count, '
-            + 'ip, '
             + 'time'
-            + ') values (?, ?, ?, ?, ?, ?, ?, ?, ?);',
+            + ') values (?, ?, ?, ?, ?, ?, ?);',
             uuid(),
-            req.body.email,
             req.body.name,
             attending_reception ? 1 : 0,
             attending_sealing ? 1 : 0,
             reception_guest_count || 0,
             sealing_guest_count || 0,
-            req.ip,
             Date.now()
         ),
         (error) => {

@@ -7,6 +7,7 @@
 		<link rel="stylesheet" href="/main.css">
         <link rel="icon" type="image/png" href="/images/favicon-16.png" sizes="16x16">
         <link rel="icon" type="image/png" href="/images/favicon-32.png" sizes="32x32">
+        <script type="text/javascript" src="/script.js" async></script>
     </head>
 
     <body>
@@ -35,24 +36,20 @@
                                 <td><input type="text" name="name" required></td>
                             </tr>
                             <tr>
-                                <td>Email:</td>
-                                <td><input type="email" name="email" placeholder="Optional"></td>
-                            </tr>
-                            <tr>
-                                <td>Number of Guests:</td>
-                                <td><input type="number" name="reception_guest_count" required></td>
-                            </tr>
-                            <tr>
                                 <td>Attending the Reception?</td>
                                 <td>
-                                    <input type="radio" id="yes_reception" name="attending_reception" value="yes" required>
+                                    <input type="radio" id="yes_reception" name="attending_reception" value="yes" onchange="onReceptionChange(event)" required checked>
                                     <label for="yes_reception">Yes</label>
 
                                     &emsp;
 
-                                    <input type="radio" id="no_reception" name="attending_reception" value="no" required>
+                                    <input type="radio" id="no_reception" name="attending_reception" value="no" onchange="onReceptionChange(event)" required>
                                     <label for="no_reception">No</label>
                                 </td>
+                            </tr>
+                            <tr>
+                                <td>Number of Guests:</td>
+                                <td><input type="number" id="reception_guest_count" name="reception_guest_count" required></td>
                             </tr>
                             <tr>
                                 <td></td>
