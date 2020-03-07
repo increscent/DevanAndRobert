@@ -1,5 +1,5 @@
-function onReceptionChange(event) {
-    let countField = document.getElementById('reception_guest_count');
+function onRSVPChange(event, id) {
+    let countField = document.getElementById(id);
     if (event.target.value == 'yes') {
         countField.required = true;
         countField.disabled = false;
