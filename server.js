@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const mustache = require('mustache');
 
 var PORT = null;
 var HOSTNAME = null;
@@ -8,12 +9,14 @@ var STATIC_DIRS = null;
 var NOT_FOUND_PAGE = null;
 var HANDLERS = {};
 var MIDDLEWARE = [];
+var TEMPLATE = null;
 
-module.exports = ({port, hostname, staticDirs, notFoundPage}) => {
+module.exports = ({port, hostname, staticDirs, notFoundPage, template}) => {
     PORT = port || 80;
     HOSTNAME = hostname || '127.0.0.1';
     STATIC_DIRS = staticDirs || [];
     NOT_FOUND_PAGE = notFoundPage || null;
+    TEMPLATE = template || null;
 
     const server = http.createServer((req, res) => {
         let [url, queryString] = req.url.split('?', 2);
@@ -173,7 +176,17 @@ function serveStatic(res, filename, statusCode) {
         let maxAge = extensions[ext] ? extensions[ext][1] : 86400;
 
 		res.setHeader('Cache-Control', `public, max-age=${maxAge}`);
-        return res.send(data, statusCode || 200, contentType);
+
+        if (ext == '.html' && TEMPLATE) {
+            fs.readFile(TEMPLATE, (err, template) => {
+                if (err) return notFound(res);
+
+                let html = mustache.render(template.toString(), {body: data.toString()});
+                return res.send(html, statusCode || 200, contentType);
+            });
+        } else {
+            return res.send(data, statusCode || 200, contentType);
+        }
     });
 }
 

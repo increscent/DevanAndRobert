@@ -9,7 +9,8 @@ db.connect(config.db.sqlitePath, config.db.dbPath, config.db.pwdPath);
 let app = server({
     port: config.server.port,
     staticDirs: ['./public'],
-    notFoundPage: './public/404.html'
+    notFoundPage: './public/404.html',
+    template: './public/template.html',
 });
 
 app.get('/rsvp/download', (req, res) => {

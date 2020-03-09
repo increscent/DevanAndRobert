@@ -1,75 +1,42 @@
-<!DOCTYPE html>
+<h2>RSVP</h2>
+<p>
+    <form method="POST" action="/rsvp/submit">
+        <table>
+            <tr>
+                <td>Name:</td>
+                <td><input type="text" name="name" required></td>
+            </tr>
+            <tr>
+                <td>Attending the Reception?</td>
+                <td>
+                    <input type="radio" id="yes_reception" name="attending_reception" value="yes" onchange="onRSVPChange(event, 'reception_guest_count')" required checked>
+                    <label for="yes_reception">Yes</label>
 
-<html>
-    <head>
-        <title>RSVP - D&R</title>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<link rel="stylesheet" href="/main.css">
-        <link rel="icon" type="image/png" href="/images/favicon-16.png" sizes="16x16">
-        <link rel="icon" type="image/png" href="/images/favicon-32.png" sizes="32x32">
-        <script type="text/javascript" src="/script.js" async></script>
-    </head>
+                    &emsp;
 
-    <body>
-        <img class="background-left" src="https://user.fm/files/v2-6acb282d9bb9944a368f75a2c745db16/flowers_left.png">
-        <img class="background-right" src="https://user.fm/files/v2-0f2ba8707ef2f07ebb3b41203ee8802d/flowers_right.png">
-        <div id="page">
-            <div id="header">
-                <a id="title" href="/">
-					Devan & Robert
-				</a>
-                <div id="links">
-                    <div id="links-container">
-                        <a href="/rsvp">RSVP</a>
-                        <a href="/registry">Registry</a>
-                    </div>
-                </div>
-            </div>
-
-            <div id="body">
-                <h2>RSVP</h2>
-                <p>
-                    <form method="POST" action="/rsvp/submit">
-                        <table>
-                            <tr>
-                                <td>Name:</td>
-                                <td><input type="text" name="name" required></td>
-                            </tr>
-                            <tr>
-                                <td>Attending the Reception?</td>
-                                <td>
-                                    <input type="radio" id="yes_reception" name="attending_reception" value="yes" onchange="onRSVPChange(event, 'reception_guest_count')" required checked>
-                                    <label for="yes_reception">Yes</label>
-
-                                    &emsp;
-
-                                    <input type="radio" id="no_reception" name="attending_reception" value="no" onchange="onRSVPChange(event, 'reception_guest_count')" required>
-                                    <label for="no_reception">No</label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Number of Guests:</td>
-                                <td><input type="number" id="reception_guest_count" name="reception_guest_count" required></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td><input type="submit" value="Submit"></td>
-                            </tr>
-                        </table>
-                    </form>
-                </p>
-                <br>
-                <p>
-                    The reception is at <i>Settebello Pizzeria Napoletana</i> in Las Vegas at 2-4 pm on Saturday, May 30th. Lunch will be provided and you don't have to stay the whole time.
-                </p>
-                <p style="text-align: center">
-                    <b>Settebello Pizzeria Napoletana</b>
-                    <br>
-                    9350 W. Sahara Ave, Suite 170
-                    <br>
-                    Las Vegas, NV 89117
-                </p>
-            </div>
-        </div>
-    </body>
-</html>
+                    <input type="radio" id="no_reception" name="attending_reception" value="no" onchange="onRSVPChange(event, 'reception_guest_count')" required>
+                    <label for="no_reception">No</label>
+                </td>
+            </tr>
+            <tr>
+                <td>Number of Guests:</td>
+                <td><input type="number" id="reception_guest_count" name="reception_guest_count" required></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="Submit"></td>
+            </tr>
+        </table>
+    </form>
+</p>
+<br>
+<p>
+    The reception is at <i>Settebello Pizzeria Napoletana</i> in Las Vegas at 2-4 pm on Saturday, May 30th. Lunch will be provided and you don't have to stay the whole time.
+</p>
+<p style="text-align: center">
+    <b>Settebello Pizzeria Napoletana</b>
+    <br>
+    9350 W. Sahara Ave, Suite 170
+    <br>
+    Las Vegas, NV 89117
+</p>
